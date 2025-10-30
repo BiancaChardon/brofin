@@ -3,28 +3,29 @@ import yfinance as yf
 # Get TQQQ stock data
 ticker = yf.Ticker("TQQQ")
 
-# Get current stock info
-info = ticker.info
-
-# Get the most recent price
-current_price = info.get('currentPrice') or info.get('regularMarketPrice')
-
 print(f"TQQQ Stock Price Information:")
 print(f"=" * 40)
-print(f"Current Price: ${current_price:.2f}")
-print(f"Previous Close: ${info.get('previousClose', 'N/A'):.2f}")
-print(f"Open: ${info.get('open', 'N/A'):.2f}")
-print(f"Day High: ${info.get('dayHigh', 'N/A'):.2f}")
-print(f"Day Low: ${info.get('dayLow', 'N/A'):.2f}")
-print(f"Volume: {info.get('volume', 'N/A'):,}")
 
-# Alternative method: Get latest data from history
-print(f"\n" + "=" * 40)
-print("Latest Trading Data:")
-hist = ticker.history(period="1d")
+# Get latest data from history (more reliable than .info)
+hist = ticker.history(period="5d")
 if not hist.empty:
     latest_close = hist['Close'].iloc[-1]
+    latest_open = hist['Open'].iloc[-1]
+    latest_high = hist['High'].iloc[-1]
+    latest_low = hist['Low'].iloc[-1]
+    latest_volume = hist['Volume'].iloc[-1]
+
     print(f"Latest Close: ${latest_close:.2f}")
-    print(f"Latest High: ${hist['High'].iloc[-1]:.2f}")
-    print(f"Latest Low: ${hist['Low'].iloc[-1]:.2f}")
-    print(f"Latest Volume: {int(hist['Volume'].iloc[-1]):,}")
+    print(f"Open: ${latest_open:.2f}")
+    print(f"Day High: ${latest_high:.2f}")
+    print(f"Day Low: ${latest_low:.2f}")
+    print(f"Volume: {int(latest_volume):,}")
+
+    if len(hist) > 1:
+        previous_close = hist['Close'].iloc[-2]
+        price_change = latest_close - previous_close
+        percent_change = (price_change / previous_close) * 100
+        print(f"Previous Close: ${previous_close:.2f}")
+        print(f"Change: ${price_change:.2f} ({percent_change:+.2f}%)")
+else:
+    print("No data available")
